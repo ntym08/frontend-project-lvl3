@@ -1,0 +1,25 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Rss Reader is a service for aggregating RSS feeds",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ntym08/frontend-project-lvl3.git"
+  },
+  "author": "Nataly Lapina lapinann08@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ntym08/frontend-project-lvl3/issues"
+  },
+  "homepage": "https://github.com/ntym08/frontend-project-lvl3#readme",
+  "devDependencies": {
+    "eslint": "^8.3.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3"
+  }
+}
