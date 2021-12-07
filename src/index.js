@@ -1,3 +1,4 @@
-import './style.scss';
+import './scss/custom.scss';
+import app from './app.js';
 
-console.log('!!');
+app();

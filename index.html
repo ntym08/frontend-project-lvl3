@@ -2,17 +2,25 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RSS Reader</title>
   </head>
   <body>
     <div class="container">
       <h1>RSS агрегатор</h1>
-      <form>
-        <label for="link">Ссылка RSS</label>
-        <input id="link" type="text">
-        <button type="submit" class="btn">Добавить</button>
+      <p>Начните читать RSS сегодня! Это легко, это красиво.</p>
+      <form class="row">
+        <div class="col-10">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="floatingInput" placeholder="link" />
+            <label for="floatingInput">Ссылка RSS</label>
+            <div id="example" class="form-text">Пример: https://ru.hexlet.io/lessons.rss</div>
+          </div>
+        </div>
+
+        <div class="col-2">
+          <button type="submit" class="btn btn-primary">Добавить</button>
+        </div>
       </form>
     </div>
   </body>
