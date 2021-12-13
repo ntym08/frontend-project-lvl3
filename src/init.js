@@ -14,11 +14,13 @@ export default () => {
     {
       form: {
         valid: true,
+        processState: 'filling',
         errors: [],
         fields: {
           url: '',
         },
       },
+
       feeds: [{ url: 'https://ru.hexlet.io/lessons.rss', title: '', description: '' }],
       posts: [],
     },
@@ -37,6 +39,13 @@ export default () => {
       })
       .then(() => {
         state.form.valid = _.isEmpty(state.form.errors);
+        if (state.form.valid) {
+          state.form.processState = 'sending';
+        } else {
+          state.form.processState = 'filling';
+        }
       });
+
+    console.log(state);
   });
 };
