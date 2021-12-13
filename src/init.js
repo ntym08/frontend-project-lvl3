@@ -1,44 +1,42 @@
-// import onChange from 'on-change';
-import * as yup from 'yup';
-// import render from './view.js';
+import onChange from 'on-change';
+import _ from 'lodash';
+import render from './view.js';
+import validate from './validation.js';
 
 export default () => {
-  const state = {
-    form: {
-      valid: true,
-      errors: [],
-      fields: {
-        url: '',
-      },
-    },
-    feeds: [{ url: '', title: '', description: '' }],
-    posts: [],
+  const elements = {
+    form: document.querySelector('.rss-form'),
+    fieldUrl: document.getElementById('url-input'),
+    submitButton: document.querySelector('button[type="submit"]'),
   };
-  const schema = yup
-    .string()
-    .required()
-    .url('Ссылка должна быть валидным URL')
-    .notOneOf(
-      state.feeds.map((feed) => feed.url),
-      'RSS уже существует'
-    );
 
-  const form = document.querySelector('.rss-form');
-  form.addEventListener('submit', (e) => {
+  const state = onChange(
+    {
+      form: {
+        valid: true,
+        errors: [],
+        fields: {
+          url: '',
+        },
+      },
+      feeds: [{ url: 'https://ru.hexlet.io/lessons.rss', title: '', description: '' }],
+      posts: [],
+    },
+    render(elements)
+  );
+
+  elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const urlValue = new FormData(e.target).get('url').trim();
     state.form.fields.url = urlValue;
+    const listUrls = state.feeds.map((feed) => feed.url);
 
-    schema
-      .validate(state.form.fields.url)
-      .then(() => {
-        state.form.errors = [];
-        state.form.valid = true;
+    validate(state.form.fields.url, listUrls)
+      .then((errors) => {
+        state.form.errors = errors;
       })
-      .catch((err) => {
-        state.form.valid = false;
-        state.form.errors = err.errors;
+      .then(() => {
+        state.form.valid = _.isEmpty(state.form.errors);
       });
-    console.log('state', state);
   });
 };
