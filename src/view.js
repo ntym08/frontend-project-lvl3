@@ -1,3 +1,18 @@
+const buildFeedbackElement = (content) => {
+  const feedbackElement = document.createElement('p');
+  feedbackElement.classList.add('feedback', 'm-0', 'position-absolute', 'small');
+  feedbackElement.textContent = content;
+  return feedbackElement;
+};
+
+const renderFormError = (elements, error) => {
+  const feedbackElement = buildFeedbackElement(error);
+  feedbackElement.classList.add('text-danger');
+  const divEl = elements.form.parentElement;
+  divEl.lastChild.remove();
+  divEl.append(feedbackElement);
+};
+
 const handleProcessState = (elements, processState) => {
   switch (processState) {
     case 'sent':
@@ -30,6 +45,10 @@ const render = (elements) => (path, value) => {
       } else {
         elements.fieldUrl.classList.remove('is-invalid');
       }
+      break;
+
+    case 'form.error':
+      renderFormError(elements, value);
       break;
 
     case 'form.processState':

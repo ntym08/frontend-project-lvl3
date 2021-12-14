@@ -15,7 +15,7 @@ export default () => {
       form: {
         valid: true,
         processState: 'filling',
-        errors: [],
+        error: [],
         fields: {
           url: '',
         },
@@ -35,10 +35,10 @@ export default () => {
 
     validate(state.form.fields.url, listUrls)
       .then((errors) => {
-        state.form.errors = errors;
+        state.form.error = errors;
       })
       .then(() => {
-        state.form.valid = _.isEmpty(state.form.errors);
+        state.form.valid = _.isEmpty(state.form.error);
         if (state.form.valid) {
           state.form.processState = 'sending';
         } else {
