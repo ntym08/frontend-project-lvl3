@@ -7,8 +7,8 @@ import validate from './validation.js';
 
 export default () => {
   const defaultLanguage = 'ru';
-  const newInstance = i18next.createInstance();
-  newInstance
+  const i18nInstance = i18next.createInstance();
+  i18nInstance
     .init({
       lng: defaultLanguage,
       debug: false,
@@ -16,7 +16,6 @@ export default () => {
         ru,
       },
     })
-    .then(console.log)
     .catch((err) => console.log('something went wrong loading', err));
 
   const elements = {
