@@ -1,9 +1,24 @@
 import onChange from 'on-change';
 import _ from 'lodash';
+import i18next from 'i18next';
+import ru from './locales/ru.js';
 import render from './view.js';
 import validate from './validation.js';
 
 export default () => {
+  const defaultLanguage = 'ru';
+  const newInstance = i18next.createInstance();
+  newInstance
+    .init({
+      lng: defaultLanguage,
+      debug: false,
+      resources: {
+        ru,
+      },
+    })
+    .then(console.log)
+    .catch((err) => console.log('something went wrong loading', err));
+
   const elements = {
     form: document.querySelector('.rss-form'),
     fieldUrl: document.getElementById('url-input'),
