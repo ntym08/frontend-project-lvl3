@@ -47,7 +47,7 @@ export default () => {
     state.form.fields.url = urlValue;
     const listUrls = state.feeds.map((feed) => feed.url);
 
-    validate(state.form.fields.url, listUrls)
+    validate(state.form.fields.url, listUrls, i18nInstance)
       .then((errors) => {
         state.form.error = errors;
       })
