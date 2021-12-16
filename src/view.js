@@ -5,11 +5,11 @@ const buildFeedbackElement = (content) => {
   return feedbackElement;
 };
 
-const renderFormError = (elements, error) => {
+const renderFormError = (elements, error, prevError) => {
   const feedbackElement = buildFeedbackElement(error);
   feedbackElement.classList.add('text-danger');
   const divEl = elements.form.parentElement;
-  divEl.lastChild.remove();
+  if (prevError) divEl.lastChild.remove();
   divEl.append(feedbackElement);
 };
 
@@ -37,7 +37,7 @@ const handleProcessState = (elements, processState) => {
   }
 };
 
-const render = (elements) => (path, value) => {
+const render = (elements) => (path, value, prevValue) => {
   switch (path) {
     case 'form.valid':
       if (!value) {
@@ -48,7 +48,7 @@ const render = (elements) => (path, value) => {
       break;
 
     case 'form.error':
-      renderFormError(elements, value);
+      renderFormError(elements, value, prevValue);
       break;
 
     case 'form.processState':

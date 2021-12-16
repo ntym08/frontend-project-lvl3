@@ -74,7 +74,7 @@ export default () => {
         },
       },
 
-      feeds: [{ url: '', title: '', description: '' }],
+      feeds: [],
       posts: [],
     },
     render(elements)
@@ -98,17 +98,23 @@ export default () => {
           state.form.processError = null;
           axios
             .get(routes.proxyUrl(state.form.fields.url))
-            .catch((err) => {
-              state.form.processError = ['Ошибка сети'];
-              console.error(err);
-            })
+            // .catch((err) => {
+            //   // state.form.processError = ['Ошибка сети'];
+            //   console.error(err);
+            // })
             .then((response) => parse(response.data.contents))
-            // .then(console.log)
-            .catch((err) => {
-              state.form.processError = ['Ошибка парсинга'];
-              console.error(err);
+            .then((htmlContent) => {
+              state.form.processState = 'loaded';
+              const { feed, posts } = getRssInfo(htmlContent, state.form.fields.url);
+              state.feeds.push(feed);
+              state.posts.push(...posts);
+              console.log(state);
             })
-            .then((htmlContent) => console.log(getRssInfo(htmlContent, state.form.fields.url)));
+            .catch((err) => {
+              state.form.processState = 'error';
+              state.form.processError = [i18nInstance.t('messages.errors.network_error')];
+              console.error(err);
+            });
         } else {
           state.form.processState = 'filling';
         }
