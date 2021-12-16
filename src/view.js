@@ -15,7 +15,7 @@ const renderFormError = (elements, error) => {
 
 const handleProcessState = (elements, processState) => {
   switch (processState) {
-    case 'sent':
+    case 'loaded':
       console.log(processState);
       break;
 
@@ -23,7 +23,7 @@ const handleProcessState = (elements, processState) => {
       console.log(processState);
       break;
 
-    case 'sending':
+    case 'getting':
       elements.form.reset();
       elements.fieldUrl.focus();
       break;
@@ -40,7 +40,7 @@ const handleProcessState = (elements, processState) => {
 const render = (elements) => (path, value) => {
   switch (path) {
     case 'form.valid':
-      if (value === false) {
+      if (!value) {
         elements.fieldUrl.classList.add('is-invalid');
       } else {
         elements.fieldUrl.classList.remove('is-invalid');
