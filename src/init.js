@@ -18,29 +18,33 @@ const routes = {
 };
 
 const getRssInfo = (htmlContent, url) => {
-  const channel = htmlContent.querySelector('channel');
-  const feedTitle = channel.querySelector('title').textContent;
-  const feedDescription = channel.querySelector('description').textContent;
-  const feed = {
-    id: _.uniqueId(),
-    title: feedTitle,
-    description: feedDescription,
-    url,
-  };
-  const posts = Array.from(channel.querySelectorAll('item')).map((item) => {
-    const postTitle = item.querySelector('title').textContent;
-    const postDescription = item.querySelector('description').textContent;
-    const postLink = item.querySelector('link').textContent;
-    const post = {
+  try {
+    const channel = htmlContent.querySelector('channel');
+    const feedTitle = channel.querySelector('title').textContent;
+    const feedDescription = channel.querySelector('description').textContent;
+    const feed = {
       id: _.uniqueId(),
-      feedId: feed.id,
-      title: postTitle,
-      description: postDescription,
-      link: postLink,
+      title: feedTitle,
+      description: feedDescription,
+      url,
     };
-    return post;
-  });
-  return { feed, posts };
+    const posts = Array.from(channel.querySelectorAll('item')).map((item) => {
+      const postTitle = item.querySelector('title').textContent;
+      const postDescription = item.querySelector('description').textContent;
+      const postLink = item.querySelector('link').textContent;
+      const post = {
+        id: _.uniqueId(),
+        feedId: feed.id,
+        title: postTitle,
+        description: postDescription,
+        link: postLink,
+      };
+      return post;
+    });
+    return { feed, posts };
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
 export default () => {
@@ -95,7 +99,7 @@ export default () => {
       .then(() => {
         state.form.valid = _.isEmpty(state.form.error);
         if (state.form.valid) {
-          state.form.processState = 'getting';
+          state.form.processState = 'loading';
           state.form.processError = null;
           axios
             .get(routes.proxyUrl(state.form.fields.url))
@@ -109,6 +113,7 @@ export default () => {
             })
             .catch((err) => {
               state.form.processState = 'failed';
+              // state.form.processError = [i18nInstance.t('messages.errors.not_valid_rss')];
               state.form.processError = [i18nInstance.t('messages.errors.network_error')];
               console.error(err);
             });

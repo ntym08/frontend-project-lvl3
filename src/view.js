@@ -7,6 +7,8 @@ const renderFeedback = (elements, message, mode = 'danger') => {
 const handleProcessState = (elements, processState, i18nInstance) => {
   switch (processState) {
     case 'loaded':
+      elements.form.reset();
+      elements.fieldUrl.focus();
       renderFeedback(elements, i18nInstance.t('messages.success.loaded'), 'success');
       console.log(processState);
       break;
@@ -15,9 +17,7 @@ const handleProcessState = (elements, processState, i18nInstance) => {
       console.log(processState);
       break;
 
-    case 'getting':
-      elements.form.reset();
-      elements.fieldUrl.focus();
+    case 'loading':
       renderFeedback(elements, i18nInstance.t('messages.success.loading'), 'success');
       console.log(processState);
       break;
