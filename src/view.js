@@ -1,34 +1,29 @@
-const buildFeedbackElement = (content) => {
-  const feedbackElement = document.createElement('p');
-  feedbackElement.classList.add('feedback', 'm-0', 'position-absolute', 'small');
-  feedbackElement.textContent = content;
-  return feedbackElement;
+const renderFeedback = (elements, message, mode = 'danger') => {
+  elements.feedbackEl.classList.remove('text-danger', 'text-success');
+  elements.feedbackEl.classList.add(`text-${mode}`);
+  elements.feedbackEl.textContent = message;
 };
 
-const renderFormError = (elements, error, prevError) => {
-  const feedbackElement = buildFeedbackElement(error);
-  feedbackElement.classList.add('text-danger');
-  const divEl = elements.form.parentElement;
-  if (prevError) divEl.lastChild.remove();
-  divEl.append(feedbackElement);
-};
-
-const handleProcessState = (elements, processState) => {
+const handleProcessState = (elements, processState, i18nInstance) => {
   switch (processState) {
     case 'loaded':
+      renderFeedback(elements, i18nInstance.t('messages.success.loaded'), 'success');
       console.log(processState);
       break;
 
-    case 'error':
+    case 'failed':
       console.log(processState);
       break;
 
     case 'getting':
       elements.form.reset();
       elements.fieldUrl.focus();
+      renderFeedback(elements, i18nInstance.t('messages.success.loading'), 'success');
+      console.log(processState);
       break;
 
     case 'filling':
+      elements.fieldUrl.focus();
       console.log(processState);
       break;
 
@@ -37,7 +32,7 @@ const handleProcessState = (elements, processState) => {
   }
 };
 
-const render = (elements) => (path, value, prevValue) => {
+const render = (elements, i18nInstance) => (path, value) => {
   switch (path) {
     case 'form.valid':
       if (!value) {
@@ -48,12 +43,17 @@ const render = (elements) => (path, value, prevValue) => {
       break;
 
     case 'form.error':
-      renderFormError(elements, value, prevValue);
+      renderFeedback(elements, value);
+      elements.fieldUrl.select();
       break;
 
     case 'form.processState':
       console.log(elements, value);
-      handleProcessState(elements, value);
+      handleProcessState(elements, value, i18nInstance);
+      break;
+
+    case 'form.processError':
+      renderFeedback(elements, value);
       break;
 
     default:

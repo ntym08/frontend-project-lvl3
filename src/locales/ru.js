@@ -8,6 +8,7 @@ export default {
         network_error: 'Ошибка сети',
       },
       success: {
+        loading: 'Идет загрузкаю Пожалуйста, подождите',
         loaded: 'RSS успешно загружен',
       },
     },

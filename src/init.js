@@ -60,6 +60,7 @@ export default () => {
     form: document.querySelector('.rss-form'),
     fieldUrl: document.getElementById('url-input'),
     submitButton: document.querySelector('button[type="submit"]'),
+    feedbackEl: document.querySelector('.feedback'),
   };
 
   const state = onChange(
@@ -77,7 +78,7 @@ export default () => {
       feeds: [],
       posts: [],
     },
-    render(elements)
+    render(elements, i18nInstance)
   );
 
   const handleSubmit = (e) => {
@@ -98,10 +99,6 @@ export default () => {
           state.form.processError = null;
           axios
             .get(routes.proxyUrl(state.form.fields.url))
-            // .catch((err) => {
-            //   // state.form.processError = ['Ошибка сети'];
-            //   console.error(err);
-            // })
             .then((response) => parse(response.data.contents))
             .then((htmlContent) => {
               state.form.processState = 'loaded';
@@ -111,7 +108,7 @@ export default () => {
               console.log(state);
             })
             .catch((err) => {
-              state.form.processState = 'error';
+              state.form.processState = 'failed';
               state.form.processError = [i18nInstance.t('messages.errors.network_error')];
               console.error(err);
             });
