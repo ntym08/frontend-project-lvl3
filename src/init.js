@@ -65,6 +65,8 @@ export default () => {
     fieldUrl: document.getElementById('url-input'),
     submitButton: document.querySelector('button[type="submit"]'),
     feedbackEl: document.querySelector('.feedback'),
+    postsContainer: document.querySelector('.posts'),
+    feedsContainer: document.querySelector('.feeds'),
   };
 
   const state = onChange(
@@ -107,8 +109,8 @@ export default () => {
             .then((htmlContent) => {
               state.form.processState = 'loaded';
               const { feed, posts } = getRssInfo(htmlContent, state.form.fields.url);
-              state.feeds.push(feed);
-              state.posts.push(...posts);
+              state.feeds.unshift(feed);
+              state.posts.unshift(...posts);
               console.log(state);
             })
             .catch((err) => {

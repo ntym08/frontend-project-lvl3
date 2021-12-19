@@ -32,6 +32,75 @@ const handleProcessState = (elements, processState, i18nInstance) => {
   }
 };
 
+const buildCardElement = (title) => {
+  const cardEl = document.createElement('div');
+  cardEl.classList.add('card', 'border-0');
+  const cardBodyEl = document.createElement('div');
+  cardBodyEl.classList.add('card-body');
+  const cardTitleEl = document.createElement('h2');
+  cardTitleEl.classList.add('card-title', 'h4');
+  cardTitleEl.textContent = title;
+  cardBodyEl.append(cardTitleEl);
+  const listEl = document.createElement('ul');
+  listEl.classList.add('list-group', 'border-0', 'rounded-0');
+  cardEl.append(cardBodyEl, listEl);
+  return { cardEl, listEl };
+};
+
+const renderPostsList = (elements, value, i18nInstance) => {
+  elements.postsContainer.innerHTML = '';
+  const { cardEl, listEl } = buildCardElement(i18nInstance.t('headings.posts'));
+  elements.postsContainer.append(cardEl);
+
+  const postsElements = value.map((post) => {
+    const liEl = document.createElement('li');
+    liEl.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
+
+    const aEl = document.createElement('a');
+    aEl.classList.add('fw-bold');
+    aEl.href = post.link;
+    aEl.dataset.id = post.id;
+    aEl.target = '_blank';
+    aEl.rel = 'noopener noreferrer';
+    aEl.textContent = post.title;
+
+    const btnEl = document.createElement('button');
+    btnEl.type = 'button';
+    btnEl.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+    btnEl.dataset.id = post.id;
+    btnEl.dataset.bsToggle = 'modal';
+    btnEl.dataset.bsTarget = '#modal';
+    btnEl.textContent = 'Просмотр';
+
+    liEl.append(aEl, btnEl);
+    return liEl;
+  });
+  listEl.append(...postsElements);
+};
+
+const renderFeedsList = (elements, value, i18nInstance) => {
+  elements.feedsContainer.innerHTML = '';
+  const { cardEl, listEl } = buildCardElement(i18nInstance.t('headings.feeds'));
+  elements.feedsContainer.append(cardEl);
+
+  const feedsElements = value.map((feed) => {
+    const liEl = document.createElement('li');
+    liEl.classList.add('list-group-item', 'border-0', 'border-end-0');
+
+    const hEl = document.createElement('h3');
+    hEl.classList.add('h6', 'm-0');
+    hEl.textContent = feed.title;
+
+    const pEl = document.createElement('p');
+    pEl.classList.add('m-0', 'small', 'text-black-50');
+    pEl.textContent = feed.description;
+
+    liEl.append(hEl, pEl);
+    return liEl;
+  });
+  listEl.append(...feedsElements);
+};
+
 const render = (elements, i18nInstance) => (path, value) => {
   switch (path) {
     case 'form.valid':
@@ -54,6 +123,13 @@ const render = (elements, i18nInstance) => (path, value) => {
 
     case 'form.processError':
       renderFeedback(elements, value);
+      break;
+    case 'feeds':
+      renderFeedsList(elements, value, i18nInstance);
+      break;
+
+    case 'posts':
+      renderPostsList(elements, value, i18nInstance);
       break;
 
     default:
