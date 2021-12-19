@@ -124,6 +124,7 @@ const render = (elements, i18nInstance) => (path, value) => {
     case 'form.processError':
       renderFeedback(elements, value);
       break;
+
     case 'feeds':
       renderFeedsList(elements, value, i18nInstance);
       break;

@@ -17,36 +17,6 @@ const routes = {
   },
 };
 
-const getRssInfo = (htmlContent, url) => {
-  try {
-    const channel = htmlContent.querySelector('channel');
-    const feedTitle = channel.querySelector('title').textContent;
-    const feedDescription = channel.querySelector('description').textContent;
-    const feed = {
-      id: _.uniqueId(),
-      title: feedTitle,
-      description: feedDescription,
-      url,
-    };
-    const posts = Array.from(channel.querySelectorAll('item')).map((item) => {
-      const postTitle = item.querySelector('title').textContent;
-      const postDescription = item.querySelector('description').textContent;
-      const postLink = item.querySelector('link').textContent;
-      const post = {
-        id: _.uniqueId(),
-        feedId: feed.id,
-        title: postTitle,
-        description: postDescription,
-        link: postLink,
-      };
-      return post;
-    });
-    return { feed, posts };
-  } catch (err) {
-    throw new Error(err);
-  }
-};
-
 export default () => {
   const defaultLanguage = 'ru';
   const i18nInstance = i18next.createInstance();
@@ -105,12 +75,11 @@ export default () => {
           state.form.processError = null;
           axios
             .get(routes.proxyUrl(state.form.fields.url))
-            .then((response) => parse(response.data.contents))
-            .then((htmlContent) => {
+            .then((response) => {
+              const { feed, posts } = parse(response.data.contents, state.form.fields.url);
+              state.feeds = [feed, ...state.feeds];
+              state.posts = [...posts, ...state.posts];
               state.form.processState = 'loaded';
-              const { feed, posts } = getRssInfo(htmlContent, state.form.fields.url);
-              state.feeds.unshift(feed);
-              state.posts.unshift(...posts);
               console.log(state);
             })
             .catch((err) => {
@@ -122,7 +91,8 @@ export default () => {
         } else {
           state.form.processState = 'filling';
         }
-      });
+      })
+      .finally(() => {});
 
     console.log(state);
   };
