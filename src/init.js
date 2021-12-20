@@ -17,6 +17,11 @@ const routes = {
   },
 };
 
+const checkForUpdates = () => {
+  console.log('rere');
+  setTimeout(checkForUpdates, 5000);
+};
+
 export default () => {
   const defaultLanguage = 'ru';
   const i18nInstance = i18next.createInstance();
@@ -84,15 +89,20 @@ export default () => {
             })
             .catch((err) => {
               state.form.processState = 'failed';
-              // state.form.processError = [i18nInstance.t('messages.errors.not_valid_rss')];
-              state.form.processError = [i18nInstance.t('messages.errors.network_error')];
+              if (axios.isAxiosError(err)) {
+                state.form.processError = [i18nInstance.t('messages.errors.network_error')];
+              } else {
+                state.form.processError = [i18nInstance.t('messages.errors.not_valid_rss')];
+              }
               console.error(err);
+            })
+            .finally(() => {
+              setTimeout(checkForUpdates, 5000);
             });
         } else {
           state.form.processState = 'filling';
         }
-      })
-      .finally(() => {});
+      });
 
     console.log(state);
   };
