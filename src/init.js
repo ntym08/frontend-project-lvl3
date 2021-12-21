@@ -50,7 +50,7 @@ export default () => {
         valid: null,
         error: [],
         processState: 'filling',
-        processError: [],
+        processError: null,
         fields: {
           url: '',
         },
@@ -68,8 +68,7 @@ export default () => {
     state.form.fields.url = urlValue;
     const listUrls = state.feeds.map((feed) => feed.url);
 
-    const error = validate(state.form.fields.url, listUrls, i18nInstance);
-    error
+    validate(state.form.fields.url, listUrls, i18nInstance)
       .then((errors) => {
         state.form.error = errors;
       })
@@ -90,9 +89,11 @@ export default () => {
             .catch((err) => {
               state.form.processState = 'failed';
               if (axios.isAxiosError(err)) {
-                state.form.processError = [i18nInstance.t('messages.errors.network_error')];
+                state.form.processError = i18nInstance.t('messages.errors.network');
+              } else if (err.isParsingError) {
+                state.form.processError = i18nInstance.t('messages.errors.no_rss');
               } else {
-                state.form.processError = [i18nInstance.t('messages.errors.not_valid_rss')];
+                state.form.processError = i18nInstance.t('messages.errors.unknown');
               }
               console.error(err);
             })
