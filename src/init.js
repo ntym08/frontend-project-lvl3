@@ -5,7 +5,6 @@ import axios from 'axios';
 import ru from './locales/ru.js';
 import render from './view.js';
 import validate from './validation.js';
-
 import parse from './parser.js';
 
 const routes = {
@@ -60,6 +59,7 @@ export default () => {
     feedbackEl: document.querySelector('.feedback'),
     postsContainer: document.querySelector('.posts'),
     feedsContainer: document.querySelector('.feeds'),
+    modal: document.querySelector('#modal'),
   };
 
   const state = onChange(
@@ -76,6 +76,10 @@ export default () => {
 
       feeds: [],
       posts: [],
+      uiState: {
+        viewedPosts: [],
+        openedModal: null,
+      },
     },
     render(elements, i18nInstance)
   );
@@ -129,7 +133,16 @@ export default () => {
     console.log(state);
   };
 
+  const handleClik = (e) => {
+    if (e.target.dataset.id) {
+      const { id: idViewedPost } = e.target.dataset;
+      state.uiState.viewedPosts = _.union([idViewedPost, ...state.uiState.viewedPosts]);
+      state.uiState.openedModal = idViewedPost;
+    }
+  };
+
   elements.form.addEventListener('submit', handleSubmit);
+  elements.postsContainer.addEventListener('click', handleClik);
 
   setTimeout(() => checkForUpdates(state), 5000);
 };

@@ -54,7 +54,14 @@ const renderPostsList = (elements, value, i18nInstance) => {
 
   const postsElements = value.map((post) => {
     const liEl = document.createElement('li');
-    liEl.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
+    liEl.classList.add(
+      'list-group-item',
+      'd-flex',
+      'justify-content-between',
+      'align-items-start',
+      'border-0',
+      'border-end-0'
+    );
 
     const aEl = document.createElement('a');
     aEl.classList.add('fw-bold');
@@ -101,6 +108,16 @@ const renderFeedsList = (elements, value, i18nInstance) => {
   listEl.append(...feedsElements);
 };
 
+const renderModal = (elements) => {
+  const modalTitle = elements.modal.querySelector('.modal-title');
+  const modalBody = elements.modal.querySelector('.modal-body');
+  const linkResourse = elements.modal.querySelector('.resource');
+  modalTitle.textContent = 'title';
+  modalBody.textContent = 'description';
+  linkResourse.href = 'http://ru';
+  console.log(modalTitle, modalBody, linkResourse);
+};
+
 const render = (elements, i18nInstance) => (path, value) => {
   switch (path) {
     case 'form.valid':
@@ -131,6 +148,18 @@ const render = (elements, i18nInstance) => (path, value) => {
 
     case 'posts':
       renderPostsList(elements, value, i18nInstance);
+      break;
+
+    case 'uiState.viewedPosts':
+      value.forEach((id) => {
+        const viewedPost = document.querySelector(`a[data-id="${id}"]`);
+        viewedPost.classList.remove('fw-bold');
+        viewedPost.classList.add('fw-normal', 'link-secondary');
+      });
+      break;
+
+    case 'uiState.openedModal':
+      renderModal(elements, value);
       break;
 
     default:
