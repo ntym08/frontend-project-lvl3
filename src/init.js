@@ -17,9 +17,27 @@ const routes = {
   },
 };
 
-const checkForUpdates = () => {
-  console.log('rere');
-  setTimeout(checkForUpdates, 5000);
+const checkForUpdates = (state) => {
+  const promises = state.feeds.map((feed) => axios
+    .get(routes.proxyUrl(feed.url))
+    .then((response) => {
+      const { posts: updatePosts } = parse(response.data.contents, feed.url);
+      const currentPosts = state.posts
+        .filter((post) => post.feedId === feed.id)
+        .map((post) => post.title);
+      const newPosts = updatePosts.filter((post) => !currentPosts.includes(post.title));
+      const newPostsWithId = newPosts.map((post) => ({
+        ...post,
+        feedId: feed.id,
+        id: _.uniqueId(),
+      }));
+      state.posts = [...newPostsWithId, ...state.posts];
+    })
+    .catch((err) => {
+      console.error(err);
+    }));
+
+  Promise.all(promises).finally(() => setTimeout(() => checkForUpdates(state), 5000));
 };
 
 export default () => {
@@ -81,8 +99,14 @@ export default () => {
             .get(routes.proxyUrl(state.form.fields.url))
             .then((response) => {
               const { feed, posts } = parse(response.data.contents, state.form.fields.url);
-              state.feeds = [feed, ...state.feeds];
-              state.posts = [...posts, ...state.posts];
+              const feedWithId = { ...feed, id: _.uniqueId() };
+              const postsWithId = posts.map((post) => ({
+                ...post,
+                feedId: feedWithId.id,
+                id: _.uniqueId(),
+              }));
+              state.feeds = [feedWithId, ...state.feeds];
+              state.posts = [...postsWithId, ...state.posts];
               state.form.processState = 'loaded';
               console.log(state);
             })
@@ -96,9 +120,6 @@ export default () => {
                 state.form.processError = i18nInstance.t('messages.errors.unknown');
               }
               console.error(err);
-            })
-            .finally(() => {
-              setTimeout(checkForUpdates, 5000);
             });
         } else {
           state.form.processState = 'filling';
@@ -109,4 +130,6 @@ export default () => {
   };
 
   elements.form.addEventListener('submit', handleSubmit);
+
+  setTimeout(() => checkForUpdates(state), 5000);
 };
