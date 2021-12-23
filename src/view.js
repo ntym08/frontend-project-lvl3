@@ -108,17 +108,18 @@ const renderFeedsList = (elements, value, i18nInstance) => {
   listEl.append(...feedsElements);
 };
 
-const renderModal = (elements) => {
+const renderModal = (elements, value, state) => {
   const modalTitle = elements.modal.querySelector('.modal-title');
   const modalBody = elements.modal.querySelector('.modal-body');
   const linkResourse = elements.modal.querySelector('.resource');
-  modalTitle.textContent = 'title';
-  modalBody.textContent = 'description';
-  linkResourse.href = 'http://ru';
+  const { title, description, link } = state.posts.find((post) => post.id === value);
+  modalTitle.textContent = title;
+  modalBody.textContent = description;
+  linkResourse.href = link;
   console.log(modalTitle, modalBody, linkResourse);
 };
 
-const render = (elements, i18nInstance) => (path, value) => {
+const render = (elements, i18nInstance, state) => (path, value) => {
   switch (path) {
     case 'form.valid':
       if (!value) {
@@ -159,7 +160,7 @@ const render = (elements, i18nInstance) => (path, value) => {
       break;
 
     case 'uiState.openedModal':
-      renderModal(elements, value);
+      renderModal(elements, value, state);
       break;
 
     default:

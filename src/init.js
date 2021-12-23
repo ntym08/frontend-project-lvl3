@@ -16,12 +16,12 @@ const routes = {
   },
 };
 
-const checkForUpdates = (state) => {
-  const promises = state.feeds.map((feed) => axios
+const checkForUpdates = (watchedState) => {
+  const promises = watchedState.feeds.map((feed) => axios
     .get(routes.proxyUrl(feed.url))
     .then((response) => {
       const { posts: updatePosts } = parse(response.data.contents, feed.url);
-      const currentPosts = state.posts
+      const currentPosts = watchedState.posts
         .filter((post) => post.feedId === feed.id)
         .map((post) => post.title);
       const newPosts = updatePosts.filter((post) => !currentPosts.includes(post.title));
@@ -30,13 +30,13 @@ const checkForUpdates = (state) => {
         feedId: feed.id,
         id: _.uniqueId(),
       }));
-      state.posts = [...newPostsWithId, ...state.posts];
+      watchedState.posts = [...newPostsWithId, ...watchedState.posts];
     })
     .catch((err) => {
       console.error(err);
     }));
 
-  Promise.all(promises).finally(() => setTimeout(() => checkForUpdates(state), 5000));
+  Promise.all(promises).finally(() => setTimeout(() => checkForUpdates(watchedState), 5000));
 };
 
 export default () => {
@@ -62,87 +62,87 @@ export default () => {
     modal: document.querySelector('#modal'),
   };
 
-  const state = onChange(
-    {
-      form: {
-        valid: null,
-        error: [],
-        processState: 'filling',
-        processError: null,
-        fields: {
-          url: '',
-        },
-      },
-
-      feeds: [],
-      posts: [],
-      uiState: {
-        viewedPosts: [],
-        openedModal: null,
+  const state = {
+    form: {
+      valid: null,
+      error: [],
+      processState: 'filling',
+      processError: null,
+      fields: {
+        url: '',
       },
     },
-    render(elements, i18nInstance)
-  );
+
+    feeds: [],
+    posts: [],
+    uiState: {
+      viewedPosts: [],
+      openedModal: null,
+    },
+  };
+
+  const watchedState = onChange(state, render(elements, i18nInstance, state));
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const urlValue = new FormData(e.target).get('url').trim();
-    state.form.fields.url = urlValue;
-    const listUrls = state.feeds.map((feed) => feed.url);
+    watchedState.form.fields.url = urlValue;
+    const listUrls = watchedState.feeds.map((feed) => feed.url);
 
-    validate(state.form.fields.url, listUrls, i18nInstance)
+    validate(watchedState.form.fields.url, listUrls, i18nInstance)
       .then((errors) => {
-        state.form.error = errors;
+        watchedState.form.error = errors;
       })
       .then(() => {
-        state.form.valid = _.isEmpty(state.form.error);
-        if (state.form.valid) {
-          state.form.processState = 'loading';
-          state.form.processError = null;
+        watchedState.form.valid = _.isEmpty(watchedState.form.error);
+        if (watchedState.form.valid) {
+          watchedState.form.processState = 'loading';
+          watchedState.form.processError = null;
           axios
-            .get(routes.proxyUrl(state.form.fields.url))
+            .get(routes.proxyUrl(watchedState.form.fields.url))
             .then((response) => {
-              const { feed, posts } = parse(response.data.contents, state.form.fields.url);
+              const { feed, posts } = parse(response.data.contents, watchedState.form.fields.url);
               const feedWithId = { ...feed, id: _.uniqueId() };
               const postsWithId = posts.map((post) => ({
                 ...post,
                 feedId: feedWithId.id,
                 id: _.uniqueId(),
               }));
-              state.feeds = [feedWithId, ...state.feeds];
-              state.posts = [...postsWithId, ...state.posts];
-              state.form.processState = 'loaded';
-              console.log(state);
+              watchedState.feeds = [feedWithId, ...watchedState.feeds];
+              watchedState.posts = [...postsWithId, ...watchedState.posts];
+              watchedState.form.processState = 'loaded';
+              console.log(watchedState);
             })
             .catch((err) => {
               state.form.processState = 'failed';
               if (axios.isAxiosError(err)) {
-                state.form.processError = i18nInstance.t('messages.errors.network');
+                watchedState.form.processError = i18nInstance.t('messages.errors.network');
               } else if (err.isParsingError) {
-                state.form.processError = i18nInstance.t('messages.errors.no_rss');
+                watchedState.form.processError = i18nInstance.t('messages.errors.no_rss');
               } else {
-                state.form.processError = i18nInstance.t('messages.errors.unknown');
+                watchedState.form.processError = i18nInstance.t('messages.errors.unknown');
               }
               console.error(err);
             });
         } else {
-          state.form.processState = 'filling';
+          watchedState.form.processState = 'filling';
         }
       });
 
-    console.log(state);
+    console.log(watchedState);
   };
 
   const handleClik = (e) => {
     if (e.target.dataset.id) {
       const { id: idViewedPost } = e.target.dataset;
-      state.uiState.viewedPosts = _.union([idViewedPost, ...state.uiState.viewedPosts]);
-      state.uiState.openedModal = idViewedPost;
+      watchedState.uiState.viewedPosts = _.union([idViewedPost,
+        ...watchedState.uiState.viewedPosts]);
+      watchedState.uiState.openedModal = idViewedPost;
     }
   };
 
   elements.form.addEventListener('submit', handleSubmit);
   elements.postsContainer.addEventListener('click', handleClik);
 
-  setTimeout(() => checkForUpdates(state), 5000);
+  setTimeout(() => checkForUpdates(watchedState), 5000);
 };
