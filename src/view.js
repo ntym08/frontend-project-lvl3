@@ -47,12 +47,12 @@ const buildCardElement = (title) => {
   return { cardEl, listEl };
 };
 
-const renderPostsList = (elements, value, i18nInstance) => {
+const renderPostsList = (elements, i18nInstance, state) => {
   elements.postsContainer.innerHTML = '';
   const { cardEl, listEl } = buildCardElement(i18nInstance.t('headings.posts'));
   elements.postsContainer.append(cardEl);
 
-  const postsElements = value.map((post) => {
+  const postsElements = state.posts.map((post) => {
     const liEl = document.createElement('li');
     liEl.classList.add(
       'list-group-item',
@@ -64,7 +64,9 @@ const renderPostsList = (elements, value, i18nInstance) => {
     );
 
     const aEl = document.createElement('a');
-    aEl.classList.add('fw-bold');
+    aEl.classList.add(
+      state.uiState.viewedPosts.has(post.id) ? ('fw-normal', 'link-secondary') : 'fw-bold'
+    );
     aEl.href = post.link;
     aEl.dataset.id = post.id;
     aEl.target = '_blank';
@@ -148,15 +150,8 @@ const render = (elements, i18nInstance, state) => (path, value) => {
       break;
 
     case 'posts':
-      renderPostsList(elements, value, i18nInstance);
-      break;
-
     case 'uiState.viewedPosts':
-      value.forEach((id) => {
-        const viewedPost = document.querySelector(`a[data-id="${id}"]`);
-        viewedPost.classList.remove('fw-bold');
-        viewedPost.classList.add('fw-normal', 'link-secondary');
-      });
+      renderPostsList(elements, i18nInstance, state);
       break;
 
     case 'uiState.openedModal':

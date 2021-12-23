@@ -23,8 +23,8 @@ export default (xmlContent, url) => {
     });
     return { feed, posts };
   } catch (err) {
-    const errObject = new Error(err);
-    errObject.isParsingError = true;
-    throw errObject;
+    const errorObject = new Error(err);
+    errorObject.isParsingError = true;
+    throw errorObject;
   }
 };
