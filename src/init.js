@@ -50,7 +50,7 @@ export default () => {
         ru,
       },
     })
-    .catch((err) => console.log('something went wrong loading', err));
+    .catch((err) => console.error('something went wrong loading', err));
 
   const elements = {
     form: document.querySelector('.rss-form'),
@@ -66,13 +66,12 @@ export default () => {
     form: {
       valid: null,
       error: [],
-      processState: 'filling',
-      processError: null,
       fields: {
         url: '',
       },
     },
-
+    processState: 'filling',
+    processError: null,
     feeds: [],
     posts: [],
     uiState: {
@@ -96,8 +95,8 @@ export default () => {
       .then(() => {
         watchedState.form.valid = _.isEmpty(watchedState.form.error);
         if (watchedState.form.valid) {
-          watchedState.form.processState = 'loading';
-          watchedState.form.processError = null;
+          watchedState.processState = 'loading';
+          watchedState.processError = null;
           axios
             .get(routes.proxyUrl(watchedState.form.fields.url))
             .then((response) => {
@@ -110,26 +109,23 @@ export default () => {
               }));
               watchedState.feeds = [feedWithId, ...watchedState.feeds];
               watchedState.posts = [...postsWithId, ...watchedState.posts];
-              watchedState.form.processState = 'loaded';
-              console.log(watchedState);
+              watchedState.processState = 'loaded';
             })
             .catch((err) => {
-              state.form.processState = 'failed';
-              if (axios.isAxiosError(err)) {
-                watchedState.form.processError = i18nInstance.t('messages.errors.network');
+              state.processState = 'failed';
+              if (err.isAxiosError) {
+                watchedState.processError = i18nInstance.t('messages.errors.network');
               } else if (err.isParsingError) {
-                watchedState.form.processError = i18nInstance.t('messages.errors.no_rss');
+                watchedState.processError = i18nInstance.t('messages.errors.no_rss');
               } else {
-                watchedState.form.processError = i18nInstance.t('messages.errors.unknown');
+                watchedState.processError = i18nInstance.t('messages.errors.unknown');
               }
               console.error(err);
             });
         } else {
-          watchedState.form.processState = 'filling';
+          watchedState.processState = 'filling';
         }
       });
-
-    console.log(watchedState);
   };
 
   const handleClik = (e) => {

@@ -10,21 +10,18 @@ const handleProcessState = (elements, processState, i18nInstance) => {
       elements.form.reset();
       elements.fieldUrl.focus();
       renderFeedback(elements, i18nInstance.t('messages.success.loaded'), 'success');
-      console.log(processState);
       break;
 
     case 'failed':
-      console.log(processState);
+      elements.fieldUrl.focus();
       break;
 
     case 'loading':
       renderFeedback(elements, i18nInstance.t('messages.success.loading'), 'success');
-      console.log(processState);
       break;
 
     case 'filling':
       elements.fieldUrl.focus();
-      console.log(processState);
       break;
 
     default:
@@ -118,7 +115,6 @@ const renderModal = (elements, value, state) => {
   modalTitle.textContent = title;
   modalBody.textContent = description;
   linkResourse.href = link;
-  console.log(modalTitle, modalBody, linkResourse);
 };
 
 const render = (elements, i18nInstance, state) => (path, value) => {
@@ -136,12 +132,11 @@ const render = (elements, i18nInstance, state) => (path, value) => {
       elements.fieldUrl.select();
       break;
 
-    case 'form.processState':
-      console.log(elements, value);
+    case 'processState':
       handleProcessState(elements, value, i18nInstance);
       break;
 
-    case 'form.processError':
+    case 'processError':
       renderFeedback(elements, value);
       break;
 

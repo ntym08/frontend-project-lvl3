@@ -7,6 +7,7 @@ export default (field, urls, i18nInstance) => {
     },
     mixed: {
       notOneOf: i18nInstance.t('messages.errors.already_exist_rss'),
+      required: i18nInstance.t('messages.errors.not_empty'),
     },
   });
 
