@@ -76,7 +76,7 @@ export default () => {
     feeds: [],
     posts: [],
     uiState: {
-      viewedPosts: [],
+      viewedPosts: new Set(),
       openedModal: null,
     },
   };
@@ -135,8 +135,7 @@ export default () => {
   const handleClik = (e) => {
     if (e.target.dataset.id) {
       const { id: idViewedPost } = e.target.dataset;
-      watchedState.uiState.viewedPosts = _.union([idViewedPost,
-        ...watchedState.uiState.viewedPosts]);
+      watchedState.uiState.viewedPosts.add(idViewedPost);
       watchedState.uiState.openedModal = idViewedPost;
     }
   };
