@@ -120,6 +120,7 @@ export default () => {
               } else {
                 watchedState.processError = i18nInstance.t('messages.errors.unknown');
               }
+              watchedState.processState = 'filling';
               console.error(err);
             });
         }
