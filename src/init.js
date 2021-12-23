@@ -122,9 +122,8 @@ export default () => {
               }
               console.error(err);
             });
-        } else {
-          watchedState.processState = 'filling';
         }
+        watchedState.processState = 'filling';
       });
   };
 

@@ -9,19 +9,27 @@ const handleProcessState = (elements, processState, i18nInstance) => {
     case 'loaded':
       elements.form.reset();
       elements.fieldUrl.focus();
+      elements.submitButton.disabled = false;
+      elements.fieldUrl.removeAttribute('readonly');
       renderFeedback(elements, i18nInstance.t('messages.success.loaded'), 'success');
       break;
 
     case 'failed':
       elements.fieldUrl.focus();
+      elements.submitButton.disabled = false;
+      elements.fieldUrl.removeAttribute('readonly');
       break;
 
     case 'loading':
       renderFeedback(elements, i18nInstance.t('messages.success.loading'), 'success');
+      elements.submitButton.disabled = true;
+      elements.fieldUrl.setAttribute('readonly', true);
       break;
 
     case 'filling':
       elements.fieldUrl.focus();
+      elements.submitButton.disabled = false;
+      elements.fieldUrl.removeAttribute('readonly');
       break;
 
     default:
