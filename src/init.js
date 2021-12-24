@@ -70,7 +70,7 @@ export default () => {
         url: '',
       },
     },
-    processState: 'filling',
+    processState: 'waiting',
     processError: null,
     feeds: [],
     posts: [],
@@ -109,10 +109,10 @@ export default () => {
               }));
               watchedState.feeds = [feedWithId, ...watchedState.feeds];
               watchedState.posts = [...postsWithId, ...watchedState.posts];
-              watchedState.processState = 'loaded';
+              watchedState.processState = 'waiting';
             })
             .catch((err) => {
-              state.processState = 'failed';
+              watchedState.processState = 'failed';
               if (err.isAxiosError) {
                 watchedState.processError = i18nInstance.t('messages.errors.network');
               } else if (err.isParsingError) {
@@ -120,11 +120,9 @@ export default () => {
               } else {
                 watchedState.processError = i18nInstance.t('messages.errors.unknown');
               }
-              watchedState.processState = 'filling';
               console.error(err);
             });
         }
-        watchedState.processState = 'filling';
       });
   };
 

@@ -6,7 +6,7 @@ const renderFeedback = (elements, message, mode = 'danger') => {
 
 const handleProcessState = (elements, processState, i18nInstance) => {
   switch (processState) {
-    case 'loaded':
+    case 'waiting':
       elements.form.reset();
       elements.fieldUrl.focus();
       elements.submitButton.disabled = false;
@@ -21,15 +21,10 @@ const handleProcessState = (elements, processState, i18nInstance) => {
       break;
 
     case 'loading':
-      renderFeedback(elements, i18nInstance.t('messages.success.loading'), 'success');
+      elements.feedbackEl.textContent = '';
+      elements.feedbackEl.classList.remove('text-danger', 'text-success');
       elements.submitButton.disabled = true;
       elements.fieldUrl.setAttribute('readonly', true);
-      break;
-
-    case 'filling':
-      elements.fieldUrl.focus();
-      elements.submitButton.disabled = false;
-      elements.fieldUrl.removeAttribute('readonly');
       break;
 
     default:
