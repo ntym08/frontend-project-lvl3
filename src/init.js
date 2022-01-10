@@ -50,92 +50,92 @@ export default () => {
         ru,
       },
     })
-    .catch((err) => console.error('something went wrong loading', err));
+    .then(() => {
+      const elements = {
+        form: document.querySelector('.rss-form'),
+        fieldUrl: document.getElementById('url-input'),
+        submitButton: document.querySelector('button[type="submit"]'),
+        feedbackEl: document.querySelector('.feedback'),
+        postsContainer: document.querySelector('.posts'),
+        feedsContainer: document.querySelector('.feeds'),
+        modal: document.querySelector('#modal'),
+      };
 
-  const elements = {
-    form: document.querySelector('.rss-form'),
-    fieldUrl: document.getElementById('url-input'),
-    submitButton: document.querySelector('button[type="submit"]'),
-    feedbackEl: document.querySelector('.feedback'),
-    postsContainer: document.querySelector('.posts'),
-    feedsContainer: document.querySelector('.feeds'),
-    modal: document.querySelector('#modal'),
-  };
+      const state = {
+        form: {
+          valid: null,
+          error: [],
+          fields: {
+            url: '',
+          },
+        },
+        processState: 'waiting',
+        processError: null,
+        feeds: [],
+        posts: [],
+        uiState: {
+          viewedPosts: new Set(),
+          openedModal: null,
+        },
+      };
 
-  const state = {
-    form: {
-      valid: null,
-      error: [],
-      fields: {
-        url: '',
-      },
-    },
-    processState: 'waiting',
-    processError: null,
-    feeds: [],
-    posts: [],
-    uiState: {
-      viewedPosts: new Set(),
-      openedModal: null,
-    },
-  };
+      const watchedState = onChange(state, render(elements, i18nInstance, state));
 
-  const watchedState = onChange(state, render(elements, i18nInstance, state));
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        const urlValue = new FormData(e.target).get('url').trim();
+        watchedState.form.fields.url = urlValue;
+        const listUrls = watchedState.feeds.map((feed) => feed.url);
+        watchedState.processState = 'loading';
+        watchedState.processError = null;
+        validate(watchedState.form.fields.url, listUrls)
+          .then(() => {
+            watchedState.form.error = [];
+            watchedState.form.valid = true;
+            axios
+              .get(routes.proxyUrl(watchedState.form.fields.url))
+              .then((response) => {
+                const { feed, posts } = parse(response.data.contents, watchedState.form.fields.url);
+                const feedWithId = { ...feed, id: _.uniqueId() };
+                const postsWithId = posts.map((post) => ({
+                  ...post,
+                  feedId: feedWithId.id,
+                  id: _.uniqueId(),
+                }));
+                watchedState.feeds = [feedWithId, ...watchedState.feeds];
+                watchedState.posts = [...postsWithId, ...watchedState.posts];
+                watchedState.processState = 'waiting';
+              })
+              .catch((err) => {
+                watchedState.processState = 'failed';
+                if (err.isAxiosError) {
+                  watchedState.processError = i18nInstance.t('messages.errors.network');
+                } else if (err.isParsingError) {
+                  watchedState.processError = i18nInstance.t('messages.errors.no_rss');
+                } else {
+                  watchedState.processError = i18nInstance.t('messages.errors.unknown');
+                }
+                console.error(err);
+              });
+          })
+          .catch((error) => {
+            watchedState.processState = 'waiting';
+            watchedState.form.error = i18nInstance.t(error.errors);
+            watchedState.form.valid = false;
+          });
+      };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const urlValue = new FormData(e.target).get('url').trim();
-    watchedState.form.fields.url = urlValue;
-    const listUrls = watchedState.feeds.map((feed) => feed.url);
-
-    validate(watchedState.form.fields.url, listUrls, i18nInstance)
-      .then((errors) => {
-        watchedState.form.error = errors;
-      })
-      .then(() => {
-        watchedState.form.valid = _.isEmpty(watchedState.form.error);
-        if (watchedState.form.valid) {
-          watchedState.processState = 'loading';
-          watchedState.processError = null;
-          axios
-            .get(routes.proxyUrl(watchedState.form.fields.url))
-            .then((response) => {
-              const { feed, posts } = parse(response.data.contents, watchedState.form.fields.url);
-              const feedWithId = { ...feed, id: _.uniqueId() };
-              const postsWithId = posts.map((post) => ({
-                ...post,
-                feedId: feedWithId.id,
-                id: _.uniqueId(),
-              }));
-              watchedState.feeds = [feedWithId, ...watchedState.feeds];
-              watchedState.posts = [...postsWithId, ...watchedState.posts];
-              watchedState.processState = 'waiting';
-            })
-            .catch((err) => {
-              watchedState.processState = 'failed';
-              if (err.isAxiosError) {
-                watchedState.processError = i18nInstance.t('messages.errors.network');
-              } else if (err.isParsingError) {
-                watchedState.processError = i18nInstance.t('messages.errors.no_rss');
-              } else {
-                watchedState.processError = i18nInstance.t('messages.errors.unknown');
-              }
-              console.error(err);
-            });
+      const handleClik = (e) => {
+        if (e.target.dataset.id) {
+          const { id: idViewedPost } = e.target.dataset;
+          watchedState.uiState.viewedPosts.add(idViewedPost);
+          watchedState.uiState.openedModal = idViewedPost;
         }
-      });
-  };
+      };
 
-  const handleClik = (e) => {
-    if (e.target.dataset.id) {
-      const { id: idViewedPost } = e.target.dataset;
-      watchedState.uiState.viewedPosts.add(idViewedPost);
-      watchedState.uiState.openedModal = idViewedPost;
-    }
-  };
+      elements.form.addEventListener('submit', handleSubmit);
+      elements.postsContainer.addEventListener('click', handleClik);
 
-  elements.form.addEventListener('submit', handleSubmit);
-  elements.postsContainer.addEventListener('click', handleClik);
-
-  setTimeout(() => checkForUpdates(watchedState), 5000);
+      setTimeout(() => checkForUpdates(watchedState), 5000);
+    });
 };

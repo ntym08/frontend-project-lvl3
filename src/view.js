@@ -70,7 +70,7 @@ const renderPostsList = (elements, i18nInstance, state) => {
     btnEl.dataset.id = post.id;
     btnEl.dataset.bsToggle = 'modal';
     btnEl.dataset.bsTarget = '#modal';
-    btnEl.textContent = 'Просмотр';
+    btnEl.textContent = i18nInstance.t('buttons.view');
 
     liEl.append(aEl, btnEl);
     return liEl;
