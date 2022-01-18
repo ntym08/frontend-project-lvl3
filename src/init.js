@@ -64,12 +64,12 @@ export default () => {
       const state = {
         form: {
           valid: null,
-          error: [],
+          error: null,
           fields: {
             url: '',
           },
         },
-        processState: 'waiting',
+        processState: null,
         processError: null,
         feeds: [],
         posts: [],
@@ -85,13 +85,16 @@ export default () => {
         e.preventDefault();
         const urlValue = new FormData(e.target).get('url').trim();
         watchedState.form.fields.url = urlValue;
-        const listUrls = watchedState.feeds.map((feed) => feed.url);
-        watchedState.processState = 'loading';
+        const urlsList = watchedState.feeds.map((feed) => feed.url);
+
+        watchedState.processState = 'formValidation';
+        watchedState.form.valid = true;
         watchedState.processError = null;
-        validate(watchedState.form.fields.url, listUrls)
+
+        validate(watchedState.form.fields.url, urlsList)
           .then(() => {
-            watchedState.form.error = [];
-            watchedState.form.valid = true;
+            watchedState.form.error = null;
+            watchedState.processState = 'feedAdding';
             axios
               .get(routes.proxyUrl(watchedState.form.fields.url))
               .then((response) => {
@@ -104,10 +107,8 @@ export default () => {
                 }));
                 watchedState.feeds = [feedWithId, ...watchedState.feeds];
                 watchedState.posts = [...postsWithId, ...watchedState.posts];
-                watchedState.processState = 'waiting';
               })
               .catch((err) => {
-                watchedState.processState = 'failed';
                 if (err.isAxiosError) {
                   watchedState.processError = i18nInstance.t('messages.errors.network');
                 } else if (err.isParsingError) {
@@ -117,15 +118,15 @@ export default () => {
                 }
                 console.error(err);
               });
+            watchedState.processState = 'formValidation';
           })
           .catch((error) => {
-            watchedState.processState = 'waiting';
             watchedState.form.error = i18nInstance.t(error.errors);
             watchedState.form.valid = false;
           });
       };
 
-      const handleClik = (e) => {
+      const handleClick = (e) => {
         if (e.target.dataset.id) {
           const { id: idViewedPost } = e.target.dataset;
           watchedState.uiState.viewedPosts.add(idViewedPost);
@@ -134,7 +135,7 @@ export default () => {
       };
 
       elements.form.addEventListener('submit', handleSubmit);
-      elements.postsContainer.addEventListener('click', handleClik);
+      elements.postsContainer.addEventListener('click', handleClick);
 
       setTimeout(() => checkForUpdates(watchedState), 5000);
     });

@@ -4,25 +4,15 @@ const renderFeedback = (elements, message, mode = 'danger') => {
   elements.feedbackEl.textContent = message;
 };
 
-const handleProcessState = (elements, processState, i18nInstance) => {
+const handleProcessState = (elements, processState) => {
   switch (processState) {
-    case 'waiting':
-      elements.form.reset();
-      elements.fieldUrl.focus();
-      elements.submitButton.disabled = false;
-      elements.fieldUrl.removeAttribute('readonly');
-      renderFeedback(elements, i18nInstance.t('messages.success.loaded'), 'success');
-      break;
-
-    case 'failed':
+    case 'formValidation':
       elements.fieldUrl.focus();
       elements.submitButton.disabled = false;
       elements.fieldUrl.removeAttribute('readonly');
       break;
 
-    case 'loading':
-      elements.feedbackEl.textContent = '';
-      elements.feedbackEl.classList.remove('text-danger', 'text-success');
+    case 'feedAdding':
       elements.submitButton.disabled = true;
       elements.fieldUrl.setAttribute('readonly', true);
       break;
@@ -54,10 +44,19 @@ const renderPostsList = (elements, i18nInstance, state) => {
 
   const postsElements = state.posts.map((post) => {
     const liEl = document.createElement('li');
-    liEl.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
+    liEl.classList.add(
+      'list-group-item',
+      'd-flex',
+      'justify-content-between',
+      'align-items-start',
+      'border-0',
+      'border-end-0'
+    );
 
     const aEl = document.createElement('a');
-    aEl.classList.add(state.uiState.viewedPosts.has(post.id) ? ('fw-normal', 'link-secondary') : 'fw-bold');
+    aEl.classList.add(
+      state.uiState.viewedPosts.has(post.id) ? ('fw-normal', 'link-secondary') : 'fw-bold'
+    );
     aEl.href = post.link;
     aEl.dataset.id = post.id;
     aEl.target = '_blank';
@@ -114,20 +113,18 @@ const renderModal = (elements, value, state) => {
 const render = (elements, i18nInstance, state) => (path, value) => {
   switch (path) {
     case 'form.valid':
+      console.log('form.valid', value);
       if (!value) {
         elements.fieldUrl.classList.add('is-invalid');
+        renderFeedback(elements, state.form.error);
+        elements.fieldUrl.select();
       } else {
         elements.fieldUrl.classList.remove('is-invalid');
       }
       break;
 
-    case 'form.error':
-      renderFeedback(elements, value);
-      elements.fieldUrl.select();
-      break;
-
     case 'processState':
-      handleProcessState(elements, value, i18nInstance);
+      handleProcessState(elements, value);
       break;
 
     case 'processError':
@@ -136,6 +133,8 @@ const render = (elements, i18nInstance, state) => (path, value) => {
 
     case 'feeds':
       renderFeedsList(elements, value, i18nInstance);
+      renderFeedback(elements, i18nInstance.t('messages.success.loaded'), 'success');
+      elements.form.reset();
       break;
 
     case 'posts':
