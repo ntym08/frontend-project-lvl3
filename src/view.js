@@ -6,7 +6,7 @@ const renderFeedback = (elements, message, mode = 'danger') => {
 
 const handleProcessState = (elements, processState) => {
   switch (processState) {
-    case 'formValidation':
+    case 'filling':
       elements.fieldUrl.focus();
       elements.submitButton.disabled = false;
       elements.fieldUrl.removeAttribute('readonly');
@@ -113,7 +113,6 @@ const renderModal = (elements, value, state) => {
 const render = (elements, i18nInstance, state) => (path, value) => {
   switch (path) {
     case 'form.valid':
-      console.log('form.valid', value);
       if (!value) {
         elements.fieldUrl.classList.add('is-invalid');
         renderFeedback(elements, state.form.error);

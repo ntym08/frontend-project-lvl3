@@ -69,7 +69,7 @@ export default () => {
             url: '',
           },
         },
-        processState: null,
+        processState: 'filling',
         processError: null,
         feeds: [],
         posts: [],
@@ -87,14 +87,13 @@ export default () => {
         watchedState.form.fields.url = urlValue;
         const urlsList = watchedState.feeds.map((feed) => feed.url);
 
-        watchedState.processState = 'formValidation';
+        watchedState.processState = 'feedAdding';
         watchedState.form.valid = true;
         watchedState.processError = null;
 
         validate(watchedState.form.fields.url, urlsList)
           .then(() => {
             watchedState.form.error = null;
-            watchedState.processState = 'feedAdding';
             axios
               .get(routes.proxyUrl(watchedState.form.fields.url))
               .then((response) => {
@@ -107,8 +106,10 @@ export default () => {
                 }));
                 watchedState.feeds = [feedWithId, ...watchedState.feeds];
                 watchedState.posts = [...postsWithId, ...watchedState.posts];
+                watchedState.processState = 'filling';
               })
               .catch((err) => {
+                watchedState.processState = 'filling';
                 if (err.isAxiosError) {
                   watchedState.processError = i18nInstance.t('messages.errors.network');
                 } else if (err.isParsingError) {
@@ -118,9 +119,9 @@ export default () => {
                 }
                 console.error(err);
               });
-            watchedState.processState = 'formValidation';
           })
           .catch((error) => {
+            watchedState.processState = 'filling';
             watchedState.form.error = i18nInstance.t(error.errors);
             watchedState.form.valid = false;
           });
