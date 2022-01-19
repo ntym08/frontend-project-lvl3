@@ -50,13 +50,11 @@ const renderPostsList = (elements, i18nInstance, state) => {
       'justify-content-between',
       'align-items-start',
       'border-0',
-      'border-end-0'
+      'border-end-0',
     );
 
     const aEl = document.createElement('a');
-    aEl.classList.add(
-      state.uiState.viewedPosts.has(post.id) ? ('fw-normal', 'link-secondary') : 'fw-bold'
-    );
+    aEl.classList.add(state.uiState.viewedPosts.has(post.id) ? ('fw-normal', 'link-secondary') : 'fw-bold');
     aEl.href = post.link;
     aEl.dataset.id = post.id;
     aEl.target = '_blank';
