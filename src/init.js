@@ -94,36 +94,32 @@ export default () => {
         validate(watchedState.form.fields.url, urlsList)
           .then(() => {
             watchedState.form.error = null;
-            axios
-              .get(routes.proxyUrl(watchedState.form.fields.url))
-              .then((response) => {
-                const { feed, posts } = parse(response.data.contents, watchedState.form.fields.url);
-                const feedWithId = { ...feed, id: _.uniqueId() };
-                const postsWithId = posts.map((post) => ({
-                  ...post,
-                  feedId: feedWithId.id,
-                  id: _.uniqueId(),
-                }));
-                watchedState.feeds = [feedWithId, ...watchedState.feeds];
-                watchedState.posts = [...postsWithId, ...watchedState.posts];
-                watchedState.processState = 'filling';
-              })
-              .catch((err) => {
-                watchedState.processState = 'filling';
-                if (err.isAxiosError) {
-                  watchedState.processError = i18nInstance.t('messages.errors.network');
-                } else if (err.isParsingError) {
-                  watchedState.processError = i18nInstance.t('messages.errors.no_rss');
-                } else {
-                  watchedState.processError = i18nInstance.t('messages.errors.unknown');
-                }
-                console.error(err);
-              });
+            return axios.get(routes.proxyUrl(watchedState.form.fields.url)).then((response) => {
+              const { feed, posts } = parse(response.data.contents, watchedState.form.fields.url);
+              const feedWithId = { ...feed, id: _.uniqueId() };
+              const postsWithId = posts.map((post) => ({
+                ...post,
+                feedId: feedWithId.id,
+                id: _.uniqueId(),
+              }));
+              watchedState.feeds = [feedWithId, ...watchedState.feeds];
+              watchedState.posts = [...postsWithId, ...watchedState.posts];
+              watchedState.processState = 'filling';
+            });
           })
-          .catch((error) => {
-            watchedState.processState = 'filling';
-            watchedState.form.error = i18nInstance.t(error.errors);
-            watchedState.form.valid = false;
+          .catch((err) => {
+            watchedState.processState = 'failed';
+            if (err.isAxiosError) {
+              watchedState.processError = i18nInstance.t('messages.errors.network');
+            } else if (err.isParsingError) {
+              watchedState.processError = i18nInstance.t('messages.errors.no_rss');
+            } else if (err.errors) {
+              watchedState.form.error = i18nInstance.t(err.errors);
+              watchedState.form.valid = false;
+            } else {
+              watchedState.processError = i18nInstance.t('messages.errors.unknown');
+            }
+            console.error(err);
           });
       };
 

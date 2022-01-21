@@ -7,7 +7,9 @@ const renderFeedback = (elements, message, mode = 'danger') => {
 const handleProcessState = (elements, processState) => {
   switch (processState) {
     case 'filling':
+    case 'failed':
       elements.fieldUrl.focus();
+      elements.fieldUrl.select();
       elements.submitButton.disabled = false;
       elements.fieldUrl.removeAttribute('readonly');
       break;
@@ -114,7 +116,6 @@ const render = (elements, i18nInstance, state) => (path, value) => {
       if (!value) {
         elements.fieldUrl.classList.add('is-invalid');
         renderFeedback(elements, state.form.error);
-        elements.fieldUrl.select();
       } else {
         elements.fieldUrl.classList.remove('is-invalid');
       }
